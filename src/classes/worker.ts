@@ -701,29 +701,22 @@ export class Worker<
       return;
     }
 
-    let job: Job<DataType, ResultType, NameType> | undefined;
     if (this.drained && block && !this.limitUntil && !this.waiting) {
       this.waiting = this.waitForJob(bclient, this.blockUntil);
       try {
         this.blockUntil = await this.waiting;
 
         if (this.blockUntil <= 0 || this.blockUntil - Date.now() < 1) {
-          job = await this.moveToActive(client, token, this.opts.name);
+          return await this.moveToActive(client, token, this.opts.name);
         }
       } finally {
         this.waiting = null;
       }
     } else {
       if (!this.isRateLimited()) {
-        job = await this.moveToActive(client, token, this.opts.name);
+        return this.moveToActive(client, token, this.opts.name);
       }
     }
-
-    if (job) {
-      this.emit('active', job, 'waiting');
-    }
-
-    return job;
   }
 
   /**
@@ -942,6 +935,7 @@ will never work with more accuracy than 1ms. */
         // Return undefined to indicate no next job is available
         return undefined;
       }
+      this.emit('active', job, 'waiting');
       return job;
     }
   }
