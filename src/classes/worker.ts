@@ -105,7 +105,7 @@ export interface WorkerListener<
    * Listen to 'failed' event.
    *
    * This event is triggered when a job has thrown an exception.
-   * Note: job parameter could be received as undefined when an stalled job
+   * Note: job parameter could be received as undefined when a stalled job
    * reaches the stalled limit and it is deleted by the removeOnFail option.
    */
   failed: (
