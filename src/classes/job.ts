@@ -1142,17 +1142,17 @@ export class Job<
         [err3, ignored],
         [err4, failed],
       ] = (await multi.exec()) as [
-        [null | Error, { [jobKey: string]: string }],
+        [null | Error, { [jobKey: string]: string } | null],
         [null | Error, string[]],
-        [null | Error, { [jobKey: string]: string }],
+        [null | Error, { [jobKey: string]: string } | null],
         [null | Error, string[]],
       ];
 
       return {
-        processed: parseObjectValues(processed),
+        processed: parseObjectValues(processed || {}),
         unprocessed,
         failed,
-        ignored,
+        ignored: ignored ?? undefined,
       };
     } else {
       const defaultOpts = {
