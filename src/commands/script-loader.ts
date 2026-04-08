@@ -130,7 +130,7 @@ export class ScriptLoader {
 
     const last = resolved.length - 1;
     if (resolved[last] === path.sep) {
-      resolved = resolved.substr(0, last);
+      resolved = resolved.substring(0, last);
     }
 
     this.pathMapper.set(name, resolved);
@@ -144,7 +144,7 @@ export class ScriptLoader {
   resolvePath(scriptName: string, stack: string[] = []): string {
     const first = scriptName[0];
     if (first === '~') {
-      scriptName = path.join(this.rootPath, scriptName.substr(2));
+      scriptName = path.join(this.rootPath, scriptName.substring(2));
     } else if (first === '<') {
       const p = scriptName.indexOf('>');
       if (p > 0) {
