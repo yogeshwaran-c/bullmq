@@ -1079,6 +1079,7 @@ export class Job<
     if (result) {
       return parseObjectValues(result);
     }
+    return {};
   }
 
   /**
@@ -1091,7 +1092,7 @@ export class Job<
   async getIgnoredChildrenFailures(): Promise<{ [jobKey: string]: string }> {
     const client = await this.queue.client;
 
-    return client.hgetall(this.toKey(`${this.id}:failed`));
+    return (await client.hgetall(this.toKey(`${this.id}:failed`))) || {};
   }
 
   /**
@@ -1104,7 +1105,7 @@ export class Job<
   async getFailedChildrenValues(): Promise<{ [jobKey: string]: string }> {
     const client = await this.queue.client;
 
-    return client.hgetall(this.toKey(`${this.id}:failed`));
+    return (await client.hgetall(this.toKey(`${this.id}:failed`))) || {};
   }
 
   /**
