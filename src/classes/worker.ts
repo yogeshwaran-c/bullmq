@@ -657,6 +657,8 @@ export class Worker<
 
   /**
    * Returns a promise that resolves to the next job in queue.
+   * Emits the 'active' event when a job is returned, making this method
+   * suitable for use in manual processing mode (autorun: false).
    * @param token - worker token to be assigned to retrieved job
    * @returns a Job or undefined if no job was available in the queue.
    */
@@ -935,6 +937,7 @@ will never work with more accuracy than 1ms. */
         // Return undefined to indicate no next job is available
         return undefined;
       }
+      this.emit('active', job, 'waiting');
       return job;
     }
   }
@@ -957,8 +960,6 @@ will never work with more accuracy than 1ms. */
           [TelemetryAttributes.JobId]: job.id,
           [TelemetryAttributes.JobName]: job.name,
         });
-
-        this.emit('active', job, 'waiting');
 
         const abortController = this.lockManager.trackJob(
           job.id,
