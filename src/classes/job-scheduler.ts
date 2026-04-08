@@ -262,7 +262,7 @@ export class JobScheduler extends QueueBase {
     client: RedisClient,
     key: string,
     next?: number,
-  ): Promise<JobSchedulerJson<D>> {
+  ): Promise<JobSchedulerJson<D> | undefined> {
     const jobData = await client.hgetall(this.toKey('repeat:' + key));
 
     return this.transformSchedulerData<D>(key, jobData, next);
@@ -387,7 +387,10 @@ export class JobScheduler extends QueueBase {
         this.getSchedulerData<D>(client, result[i], parseInt(result[i + 1])),
       );
     }
-    return Promise.all(jobs);
+    const results = await Promise.all(jobs);
+    return results.filter(
+      (job): job is JobSchedulerJson<D> => job !== undefined,
+    );
   }
 
   async getSchedulersCount(): Promise<number> {
