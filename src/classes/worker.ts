@@ -242,14 +242,14 @@ export class Worker<
       typeof this.opts.maxStalledCount !== 'number' ||
       this.opts.maxStalledCount < 0
     ) {
-      throw new Error('maxStalledCount must be greater or equal than 0');
+      throw new Error('maxStalledCount must be greater than or equal to 0');
     }
 
     if (
       typeof this.opts.maxStartedAttempts === 'number' &&
       this.opts.maxStartedAttempts < 0
     ) {
-      throw new Error('maxStartedAttempts must be greater or equal than 0');
+      throw new Error('maxStartedAttempts must be greater than or equal to 0');
     }
 
     if (

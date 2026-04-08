@@ -265,7 +265,7 @@ export class RedisConnection extends EventEmitter {
           )
         ) {
           throw new Error(
-            `Redis version needs to be greater or equal than ${RedisConnection.minimumVersion} ` +
+            `Redis version needs to be greater than or equal to ${RedisConnection.minimumVersion} ` +
               `Current: ${this.version}`,
           );
         }

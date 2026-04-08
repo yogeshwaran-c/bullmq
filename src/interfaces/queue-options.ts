@@ -29,7 +29,7 @@ export interface QueueBaseOptions {
   prefix?: string;
 
   /**
-   * Avoid version validation to be greater or equal than v5.0.0.
+   * Avoid version validation to be greater than or equal to v5.0.0.
    * @defaultValue false
    */
   skipVersionCheck?: boolean;
