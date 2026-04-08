@@ -230,7 +230,7 @@ export class QueueGetters<JobBase extends Job = Job> extends QueueBase {
    */
   async getMeta(): Promise<QueueMeta> {
     const client = await this.client;
-    const config = await client.hgetall(this.keys.meta);
+    const config = (await client.hgetall(this.keys.meta)) || {};
 
     const {
       concurrency,
