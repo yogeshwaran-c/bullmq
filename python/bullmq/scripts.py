@@ -325,10 +325,6 @@ class Scripts:
 
     def promoteArgs(self, job_id: str):
         keys = self.getKeys(['delayed', 'wait', 'paused', 'meta', 'prioritized', 'active', 'pc', 'events', 'marker'])
-        keys.append(self.toKey(job_id))
-        keys.append(self.keys['events'])
-        keys.append(self.keys['paused'])
-        keys.append(self.keys['meta'])
 
         args = [self.keys[''], job_id]
 
