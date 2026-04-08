@@ -590,9 +590,6 @@ export class QueueGetters<JobBase extends Job = Job> extends QueueBase {
 
   /**
    * Returns the current count of workers for the queue.
-   *
-   * getWorkersCount(): Promise<number>
-   *
    */
   async getWorkersCount(): Promise<number> {
     const workers = await this.getWorkers();
