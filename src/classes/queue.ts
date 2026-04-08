@@ -234,11 +234,11 @@ export class Queue<
   /**
    * Get library version.
    *
-   * @returns the content of the meta.library field.
+   * @returns the content of the meta.version field, or null if not set.
    */
-  async getVersion(): Promise<string> {
+  async getVersion(): Promise<string | null> {
     const client = await this.client;
-    return await client.hget(this.keys.meta, 'version');
+    return client.hget(this.keys.meta, 'version');
   }
 
   get repeat(): Promise<Repeat> {
