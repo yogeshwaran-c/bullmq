@@ -536,7 +536,7 @@ export class Job<
       deduplicationId: this.deduplicationId,
       repeatJobKey: this.repeatJobKey,
       returnvalue: JSON.stringify(this.returnvalue),
-      nrjid: this.nextRepeatableJobId,
+      nextRepeatableJobId: this.nextRepeatableJobId,
     });
   }
 

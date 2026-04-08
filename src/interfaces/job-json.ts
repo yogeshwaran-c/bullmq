@@ -19,7 +19,7 @@ export interface JobJson {
   parent?: ParentKeys;
   parentKey?: string;
   repeatJobKey?: string;
-  nextRepeatableJobKey?: string;
+  nextRepeatableJobId?: string;
   debounceId?: string;
   deduplicationId?: string;
   processedBy?: string;
