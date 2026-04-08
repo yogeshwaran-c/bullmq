@@ -73,7 +73,7 @@ export interface FlowProducerListener extends IoredisListener {
   /**
    * Listen to 'error' event.
    *
-   * This event is triggered when an error is throw.
+   * This event is triggered when an error is thrown.
    */
   error: (failedReason: Error) => void;
 }
