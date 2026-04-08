@@ -194,7 +194,7 @@ class Job:
         self.returnvalue = return_value or None
 
         keys, args = self.scripts.moveToCompletedArgs(
-                    self, stringified_return_value, self.opts.get("removeOnFail", False),
+                    self, stringified_return_value, self.opts.get("removeOnComplete", False),
                     token, fetchNext
                 )
 
