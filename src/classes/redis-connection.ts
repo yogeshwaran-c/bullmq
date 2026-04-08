@@ -407,7 +407,7 @@ export class RedisConnection extends EventEmitter {
         databaseType = 'dragonfly';
         // For Dragonfly, extract version from dragonfly_version field
         if (line.indexOf('dragonfly_version:') === 0) {
-          redisVersion = line.substr('dragonfly_version:'.length);
+          redisVersion = line.substring('dragonfly_version:'.length);
         }
       }
       // Check for Valkey
@@ -418,12 +418,12 @@ export class RedisConnection extends EventEmitter {
         databaseType = 'valkey';
         // For Valkey, extract version from valkey_version field
         if (line.indexOf('valkey_version:') === 0) {
-          redisVersion = line.substr('valkey_version:'.length);
+          redisVersion = line.substring('valkey_version:'.length);
         }
       }
       // Standard Redis version detection
       else if (line.indexOf(redisPrefix) === 0) {
-        redisVersion = line.substr(redisPrefix.length);
+        redisVersion = line.substring(redisPrefix.length);
         // Keep Redis as default unless we find evidence of other databases above
         if (databaseType === 'redis') {
           databaseType = 'redis';
@@ -431,7 +431,7 @@ export class RedisConnection extends EventEmitter {
       }
 
       if (line.indexOf(maxMemoryPolicyPrefix) === 0) {
-        const maxMemoryPolicy = line.substr(maxMemoryPolicyPrefix.length);
+        const maxMemoryPolicy = line.substring(maxMemoryPolicyPrefix.length);
         if (maxMemoryPolicy !== 'noeviction') {
           console.warn(
             `IMPORTANT! Eviction policy is ${maxMemoryPolicy}. It should be "noeviction"`,
