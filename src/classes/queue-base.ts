@@ -94,6 +94,11 @@ export class QueueBase extends EventEmitter implements MinimalQueue {
     return this.connection.client;
   }
 
+  /**
+   * Initializes the `Scripts` bundle bound to this queue's connection and keys.
+   * Subclasses can override this hook to swap in a different script
+   * implementation (e.g. for a different Redis-compatible backend).
+   */
   protected createScripts() {
     this.scripts = createScripts(this);
   }
@@ -140,14 +145,31 @@ export class QueueBase extends EventEmitter implements MinimalQueue {
     }
   }
 
+  /**
+   * Returns a promise that resolves once the underlying Redis connection is
+   * ready to accept commands. Useful when callers want to ensure the
+   * connection has been established before performing follow-up work.
+   */
   waitUntilReady(): Promise<RedisClient> {
     return this.client;
   }
 
+  /**
+   * Returns the queue's name encoded as base64. Used to build a
+   * connection-friendly client name that is safe across the wire even when
+   * the queue name contains characters Redis would otherwise reject.
+   */
   protected base64Name(): string {
     return Buffer.from(this.name).toString('base64');
   }
 
+  /**
+   * Builds the Redis `CLIENT SETNAME` value used to identify this queue's
+   * connection. Format: `<prefix>:<base64(queueName)><suffix>`.
+   *
+   * @param suffix - An optional suffix appended after the base64 name (used
+   *   by subclasses to distinguish blocking vs. non-blocking connections).
+   */
   protected clientName(suffix = ''): string {
     const queueNameBase64 = this.base64Name();
     return `${this.opts.prefix}:${queueNameBase64}${suffix}`;
@@ -173,6 +195,20 @@ export class QueueBase extends EventEmitter implements MinimalQueue {
     return this.connection.disconnect();
   }
 
+  /**
+   * Runs an async operation and tolerates Redis connection errors.
+   *
+   * If `fn` throws a connection-related error (e.g. ECONNREFUSED, IORedis
+   * disconnect), the error is swallowed and the method returns `undefined`
+   * after waiting `delayInMs` (so the caller can retry on the next tick).
+   * Any non-connection error is re-emitted on the queue's `error` event.
+   *
+   * @param fn - The async operation to run.
+   * @param delayInMs - How long to wait after a connection error before
+   *   resolving. Set to `0` to skip the delay. Defaults to `DELAY_TIME_5`.
+   * @returns The value returned by `fn`, or `undefined` if a connection
+   *   error was caught.
+   */
   protected async checkConnectionError<T>(
     fn: () => Promise<T>,
     delayInMs = DELAY_TIME_5,
