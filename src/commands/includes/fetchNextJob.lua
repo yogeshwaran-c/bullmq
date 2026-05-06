@@ -89,7 +89,7 @@ local function fetchNextJob(waitKey, activeKey, prioritizedKey, eventStreamKey,
     local nextTimestamp = getNextDelayedTimestamp(delayedKey)
     if nextTimestamp ~= nil then
         -- The result is guaranteed to be positive, since the
-        -- ZRANGEBYSCORE command would have return a job otherwise.
+        -- ZRANGEBYSCORE command would have returned a job otherwise.
         return {0, 0, 0, nextTimestamp}
     end
 end
