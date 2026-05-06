@@ -55,6 +55,11 @@ export interface ScriptMetadata {
   isAlias?: boolean;
 }
 
+/**
+ * Error thrown by the {@link ScriptLoader} when a Lua script or one of its
+ * `@include` directives cannot be parsed or resolved. Carries the include
+ * stack along with line/column information for nicer diagnostics.
+ */
 export class ScriptLoaderError extends Error {
   /**
    * The include stack
@@ -63,6 +68,14 @@ export class ScriptLoaderError extends Error {
   public readonly line: number;
   public readonly position: number;
 
+  /**
+   * @param message - Human-readable error description.
+   * @param path - Path of the script in which the error occurred.
+   * @param stack - Chain of include paths leading to the failing script.
+   * @param line - 1-based line number where the error occurred, if known.
+   * @param position - Column position within the line where the error
+   *   occurred. Defaults to `0`.
+   */
   constructor(
     message: string,
     path: string,
@@ -98,6 +111,11 @@ export class ScriptLoader {
   private commandCache = new Map<string, Command[]>();
   private rootPath: string;
 
+  /**
+   * @param extraMappings - Optional map of alias names to paths used when
+   *   resolving `<alias>/...` style includes. The aliases `~` and `rootDir`
+   *   are always preconfigured to the package root.
+   */
   constructor(extraMappings?: { [key: string]: string }) {
     this.rootPath = getPkgJsonDir();
     this.pathMapper.set('~', this.rootPath);
@@ -405,6 +423,23 @@ export class ScriptLoader {
     return content;
   }
 
+  /**
+   * Load a single command from a Lua file, recursively resolving any
+   * `@include` directives and interpolating their contents.
+   *
+   * @param filename - Path to the `.lua` script. The file basename is
+   *   expected to follow the `cmdName-numKeys.lua` convention.
+   * @param dir - Directory used to resolve relative includes within the
+   *   script.
+   * @param cache - Optional cache of previously parsed scripts to avoid
+   *   re-reading and re-parsing the same files.
+   * @param isLoadingIncludes - When `true`, the script is treated as an
+   *   include rather than a top-level command.
+   * @param fileAlias - Optional alias path under which the script should be
+   *   registered in the cache (used for cross-directory includes).
+   * @returns A {@link Command} object containing the script name and the
+   *   resolved Lua source ready to be defined on a Redis client.
+   */
   async loadCommand(
     filename: string,
     dir: string,
@@ -459,6 +494,16 @@ export class ScriptLoader {
    * For example:
    * moveToFinish-3.lua
    *
+   * @param dir - Directory containing the Lua scripts to load. Defaults to
+   *   the loader module directory.
+   * @param cache - Optional cache shared across loads to deduplicate parsing
+   *   of repeatedly included scripts.
+   * @param isLoadingIncludes - When `true`, the directory is treated as a
+   *   library of includes rather than top-level commands.
+   * @param directoryAlias - Optional alias path used to register loaded
+   *   scripts in the cache for cross-directory includes.
+   * @returns A promise that resolves to the list of {@link Command} objects
+   *   defined by the directory's `.lua` files.
    */
   async loadScripts(
     dir?: string,
