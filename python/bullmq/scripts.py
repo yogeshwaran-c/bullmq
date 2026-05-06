@@ -21,7 +21,7 @@ import msgpack
 
 class Scripts:
 
-    def __init__(self, prefix: str, queueName: str, redisConnection: RedisConnection):
+    def __init__(self, prefix: str, queueName: str, redisConnection: RedisConnection) -> None:
         self.prefix = prefix
         self.queueName = queueName
         self.keys = {}
@@ -32,15 +32,15 @@ class Scripts:
         self.queue_keys = QueueKeys(prefix)
         self.keys = self.queue_keys.getKeys(queueName)
 
-    def resetQueueKeys(self, queue_name: str):
+    def resetQueueKeys(self, queue_name: str) -> None:
         self.queueName = queue_name
         self.keys = self.queue_keys.getKeys(queue_name)
 
-    def toKey(self, name: str):
+    def toKey(self, name: str) -> str:
         return self.queue_keys.toKey(self.queueName, name)
 
-    def getKeys(self, keys: list[str]):
-        def mapKey(key):
+    def getKeys(self, keys: list[str]) -> list[str]:
+        def mapKey(key: str) -> str:
             return self.keys[key]
         return list(map(mapKey, keys))
 
@@ -722,7 +722,7 @@ def array2obj(arr: list[str]) -> dict[str, str]:
     return obj
 
 
-def convert_to_int(text: str):
+def convert_to_int(text: str) -> int:
     try:
         result = int(text)
         return result
