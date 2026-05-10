@@ -164,7 +164,7 @@ class Scripts:
 
         return self.commands["addParentJob"](keys=keys, args=args, client=pipe)
 
-    def cleanJobsInSetArgs(self, set: str, grace: int, limit:int = 0):
+    def cleanJobsInSetArgs(self, set: str, grace: int, limit:int = 0) -> tuple[list[str], list]:
         keys = [self.toKey(set),
                 self.keys['events'],
                 self.keys['repeat']]
@@ -176,7 +176,7 @@ class Scripts:
         keys, args = self.cleanJobsInSetArgs(set, grace, limit)
         return self.commands["cleanJobsInSet"](keys=keys, args=args)
 
-    def moveToWaitingChildrenArgs(self, job_id, token, opts: dict = {}):
+    def moveToWaitingChildrenArgs(self, job_id, token, opts: dict = {}) -> tuple[list[str], list]:
         keys = [self.keys['active'],
                 self.keys['waiting-children'],
                 self.toKey(job_id),
@@ -208,7 +208,7 @@ class Scripts:
                     })
         return None
 
-    def getRangesArgs(self, types, start: int = 0, end: int = 1, asc: bool = False):
+    def getRangesArgs(self, types, start: int = 0, end: int = 1, asc: bool = False) -> tuple[list[str], list]:
         transformed_types = []
         for type in types:
             transformed_types.append("wait" if type == "waiting" else type)
@@ -254,13 +254,13 @@ class Scripts:
 
         return results
 
-    def saveStacktraceArgs(self, job_id: str, stacktrace: str, failedReason: str):
+    def saveStacktraceArgs(self, job_id: str, stacktrace: str, failedReason: str) -> tuple[list[str], list]:
         keys = [self.toKey(job_id)]
         args = [stacktrace, failedReason]
 
         return (keys, args)
 
-    def retryJobArgs(self, job_id: str, lifo: bool, token: str, opts: dict = {}):
+    def retryJobArgs(self, job_id: str, lifo: bool, token: str, opts: dict = {}) -> tuple[list[str], list]:
         keys = self.getKeys(['active', 'wait', 'paused'])
         keys.append(self.toKey(job_id))
         keys.append(self.keys['meta'])
@@ -295,7 +295,7 @@ class Scripts:
                     })
         return None
 
-    def moveToDelayedArgs(self, job_id: str, timestamp: int, token: str, delay: int = 0, opts: dict = {}):
+    def moveToDelayedArgs(self, job_id: str, timestamp: int, token: str, delay: int = 0, opts: dict = {}) -> tuple[list[str], list]:
         keys = self.getKeys(['marker', 'active', 'prioritized', 'delayed'])
         keys.append(self.toKey(job_id))
         keys.append(self.keys['events'])
@@ -344,7 +344,7 @@ class Scripts:
                 return raw2NextJobData(result)
         return None
 
-    def promoteArgs(self, job_id: str):
+    def promoteArgs(self, job_id: str) -> tuple[list[str], list]:
         keys = self.getKeys(['delayed', 'wait', 'paused', 'meta', 'prioritized', 'active', 'pc', 'events', 'marker'])
         keys.append(self.toKey(job_id))
         keys.append(self.keys['events'])
@@ -384,7 +384,7 @@ class Scripts:
 
         return self.commands["getCounts"](keys=keys, args=transformed_types)
 
-    def getCountsPerPriorityArgs(self, priorities):
+    def getCountsPerPriorityArgs(self, priorities) -> tuple[list[str], list]:
         keys = [self.keys['wait'],
                 self.keys['paused'],
                 self.keys['meta'],
@@ -526,7 +526,7 @@ class Scripts:
         args = [self.keys[''], '1' if delayed else '0']
         await self.commands["drain"](keys, args=args)
 
-    def moveJobsToWaitArgs(self, state: str, count: int, timestamp: int) -> int:
+    def moveJobsToWaitArgs(self, state: str, count: int, timestamp: int) -> tuple[list[str], list]:
         keys = self.getKeys(
             ['', 'events', state, 'wait', 'paused', 'meta', 'active', 'marker'])
 
