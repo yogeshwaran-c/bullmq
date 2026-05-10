@@ -553,6 +553,45 @@ describe('events', { timeout: 8000 }, () => {
     await worker.close();
   });
 
+  describe("'completed' event returnvalue", () => {
+    it('delivers the deserialized return value (object), not a string', async () => {
+      type Result = { foobar: boolean };
+
+      const worker = new Worker<unknown, Result>(
+        queueName,
+        async () => ({ foobar: true }),
+        { connection, prefix },
+      );
+      await worker.waitUntilReady();
+
+      const completed = new Promise<void>((resolve, reject) => {
+        queueEvents.once<QueueEventsListener<Result>>(
+          'completed',
+          ({ returnvalue }) => {
+            try {
+              // Compile-time: returnvalue is typed as Result, so accessing
+              // `.foobar` is type-safe (no `as any` needed).
+              // Runtime: it is an object, not a string. Before this fix the
+              // type said `string` even though JSON.parse already produced
+              // an object — see issue #4147.
+              expect(typeof returnvalue).toBe('object');
+              expect(returnvalue).toEqual({ foobar: true });
+              expect(returnvalue.foobar).toBe(true);
+              resolve();
+            } catch (err) {
+              reject(err);
+            }
+          },
+        );
+      });
+
+      await queue.add('with-object-return', {});
+
+      await completed;
+      await worker.close();
+    });
+  });
+
   describe('when jobs removal is attempted on non-existed records', async () => {
     it('should not publish removed events', async () => {
       const numRemovals = 100;

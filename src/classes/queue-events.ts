@@ -15,7 +15,7 @@ import {
 import { QueueBase } from './queue-base';
 import { RedisConnection } from './redis-connection';
 
-export interface QueueEventsListener extends IoredisListener {
+export interface QueueEventsListener<ResultType = any> extends IoredisListener {
   /**
    * Listen to 'active' event.
    *
@@ -60,12 +60,14 @@ export interface QueueEventsListener extends IoredisListener {
    *
    * @param args - An object containing details about the completed job.
    *   - `jobId` - The unique identifier of the job that completed.
-   *   - `returnvalue` - The return value of the job, serialized as a string.
+   *   - `returnvalue` - The deserialized return value of the job. Defaults to
+   *     `any` and can be narrowed via the `ResultType` generic parameter
+   *     (e.g. `QueueEventsListener<MyReturnType>`).
    *   - `prev` - The previous state of the job before completion (e.g., 'active'), if applicable.
    * @param id - The identifier of the event.
    */
   completed: (
-    args: { jobId: string; returnvalue: string; prev?: string },
+    args: { jobId: string; returnvalue: ResultType; prev?: string },
     id: string,
   ) => void;
 
