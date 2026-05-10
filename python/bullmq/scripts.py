@@ -9,7 +9,7 @@ from bullmq.queue_keys import QueueKeys
 from bullmq.error_code import ErrorCode
 from bullmq.custom_errors import UnrecoverableError
 from bullmq.utils import isRedisVersionLowerThan, get_parent_key, object_to_flat_array
-from typing import Any, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from bullmq.job import Job
     from bullmq.redis_connection import RedisConnection
@@ -176,7 +176,8 @@ class Scripts:
         keys, args = self.cleanJobsInSetArgs(set, grace, limit)
         return self.commands["cleanJobsInSet"](keys=keys, args=args)
 
-    def moveToWaitingChildrenArgs(self, job_id, token, opts: dict = {}):
+    def moveToWaitingChildrenArgs(self, job_id, token, opts: Optional[dict] = None):
+        opts = opts or {}
         keys = [self.keys['active'],
                 self.keys['waiting-children'],
                 self.toKey(job_id),
@@ -184,7 +185,7 @@ class Scripts:
                 self.toKey(job_id) + ":unsuccessful",
                 self.keys['stalled'],
                 self.keys['events']]
-        child_key = opts.get("child") if opts else None
+        child_key = opts.get("child")
         args = [token, get_parent_key(child_key) or "", round(time.time() * 1000), job_id,
                 self.keys['']]
 
@@ -260,7 +261,8 @@ class Scripts:
 
         return (keys, args)
 
-    def retryJobArgs(self, job_id: str, lifo: bool, token: str, opts: dict = {}):
+    def retryJobArgs(self, job_id: str, lifo: bool, token: str, opts: Optional[dict] = None):
+        opts = opts or {}
         keys = self.getKeys(['active', 'wait', 'paused'])
         keys.append(self.toKey(job_id))
         keys.append(self.keys['meta'])
@@ -280,8 +282,8 @@ class Scripts:
 
         return (keys, args)
 
-    async def retryJob(self, job_id: str, lifo: bool, token: str = "0", opts = {}):
-        keys, args = self.retryJobArgs(job_id, lifo, token, opts)
+    async def retryJob(self, job_id: str, lifo: bool, token: str = "0", opts: Optional[dict] = None):
+        keys, args = self.retryJobArgs(job_id, lifo, token, opts or {})
 
         result = await self.commands["retryJob"](keys=keys, args=args)
 
@@ -295,7 +297,8 @@ class Scripts:
                     })
         return None
 
-    def moveToDelayedArgs(self, job_id: str, timestamp: int, token: str, delay: int = 0, opts: dict = {}):
+    def moveToDelayedArgs(self, job_id: str, timestamp: int, token: str, delay: int = 0, opts: Optional[dict] = None):
+        opts = opts or {}
         keys = self.getKeys(['marker', 'active', 'prioritized', 'delayed'])
         keys.append(self.toKey(job_id))
         keys.append(self.keys['events'])
@@ -327,8 +330,8 @@ class Scripts:
 
         return (keys, args)
 
-    async def moveToDelayed(self, job_id: str, timestamp: int, delay: int, token: str = "0", opts: dict = {}):
-        keys, args = self.moveToDelayedArgs(job_id, timestamp, token, delay, opts)
+    async def moveToDelayed(self, job_id: str, timestamp: int, delay: int, token: str = "0", opts: Optional[dict] = None):
+        keys, args = self.moveToDelayedArgs(job_id, timestamp, token, delay, opts or {})
 
         result = await self.commands["moveToDelayed"](keys=keys, args=args)
 
@@ -462,7 +465,8 @@ class Scripts:
                     })
         return None
 
-    async def reprocessJob(self, job: Job, state: str, opts: dict = {}):
+    async def reprocessJob(self, job: Job, state: str, opts: Optional[dict] = None):
+        opts = opts or {}
         keys = [self.toKey(job.id)]
         keys.append(self.keys['events'])
         keys.append(self.keys[state])
