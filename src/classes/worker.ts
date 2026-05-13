@@ -1145,6 +1145,9 @@ will never work with more accuracy than 1ms. */
         err instanceof WaitingChildrenError ||
         err.name == 'WaitingChildrenError'
       ) {
+        if (this.closing || this.paused) {
+          return;
+        }
         const client = await this.client;
         return this.moveToActive(client, token, this.opts.name);
       }

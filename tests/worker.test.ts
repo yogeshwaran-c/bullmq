@@ -4010,6 +4010,34 @@ describe('workers', () => {
           await worker.close();
         }, 8000);
 
+        it('should resolve close() promptly when processor uses DelayedError (closes #4163)', async () => {
+          const worker = new Worker(
+            queueName,
+            async (job, token) => {
+              await job.moveToDelayed(Date.now() + 50, token);
+              throw new DelayedError();
+            },
+            { connection, prefix },
+          );
+
+          await worker.waitUntilReady();
+
+          await new Promise<void>(resolve => {
+            worker.once('active', () => resolve());
+            queue.add('test', {});
+          });
+
+          const closeTimeout = new Promise<'timeout'>(resolve =>
+            setTimeout(() => resolve('timeout'), 3000),
+          );
+          const result = await Promise.race([
+            worker.close().then(() => 'closed' as const),
+            closeTimeout,
+          ]);
+
+          expect(result).toBe('closed');
+        }, 8000);
+
         describe('when passing maxStartedAttempts', () => {
           it('should fail job when consuming the max started attempts', async () => {
             const worker = new Worker(
