@@ -146,7 +146,7 @@ const worker = new WorkerPro(
 );
 ```
 
-Only jobs explicitly marked with `setAsFailed` will fail; the remaining jobs in the batch will complete succesfully once the processor finishes.
+Only jobs explicitly marked with `setAsFailed` will fail; the remaining jobs in the batch will complete successfully once the processor finishes.
 
 ### Handling events
 
