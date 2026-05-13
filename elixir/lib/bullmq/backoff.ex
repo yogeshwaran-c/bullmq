@@ -111,9 +111,10 @@ defmodule BullMQ.Backoff do
     * `strategy` - Backoff strategy (`:fixed`, `:exponential`, or custom)
     * `attempt` - Current attempt number (1-based)
     * `base_delay` - Base delay in milliseconds
-    * `opts` - Additional options (`:jitter`, etc.)
-    * `error` - The error that caused the retry (optional)
-    * `job` - The job being retried (optional)
+    * `opts` - Keyword list of additional options:
+      * `:jitter` - Fractional jitter applied to the computed delay (0..1)
+      * `:error` - The error that caused the retry, passed to custom strategies (optional)
+      * `:job` - The job being retried, passed to custom strategies (optional)
 
   ## Returns
 
